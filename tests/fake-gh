@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+# Fake gh for tests. Logs argv to $FAKE_GH_LOG, saves each POST payload to $FAKE_GH_DIR/payload-<n>.json.
+# FAKE_GH_AUTHOR: PR author login (default alice). FAKE_GH_POST_FAIL: number of first POSTs to reject.
+echo "$*" >>"$FAKE_GH_LOG"
+
+if [ "$1 $2" = "pr view" ]; then
+  printf '{"number": 7, "author": {"login": "%s"}}\n' "${FAKE_GH_AUTHOR:-alice}"
+  exit 0
+fi
+
+if [ "$1" = api ] && [[ " $* " == *" --method POST "* ]]; then
+  input=
+  prev=
+  for a in "$@"; do
+    if [ "$prev" = --input ]; then input=$a; fi
+    prev=$a
+  done
+  n=$(($(find "$FAKE_GH_DIR" -maxdepth 1 -name 'payload-*.json' | wc -l) + 1))
+  cp "$input" "$FAKE_GH_DIR/payload-$n.json"
+  if [ "$n" -le "${FAKE_GH_POST_FAIL:-0}" ]; then
+    echo "gh: Unprocessable Entity (HTTP 422) attempt $n" >&2
+    exit 1
+  fi
+  echo "{\"html_url\": \"https://github.com/o/r/pull/7#pullrequestreview-$n\"}"
+  exit 0
+fi
+
+echo "fake-gh: unexpected call: $*" >&2
+exit 1

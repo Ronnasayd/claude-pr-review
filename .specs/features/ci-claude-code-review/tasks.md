@@ -122,11 +122,11 @@ T9 → T10 → T11
 
 **Done when**:
 
-- [ ] Fake `gh` log shows no `api user` call and `--repo o/r` on every `pr` call
-- [ ] Missing `--pr` or `--repo` exits 1 with usage
-- [ ] Author == login posts event COMMENT with the inherited own-PR footer
-- [ ] Gate check passes: `bash tests/run.sh`
-- [ ] Test count: 12 tests pass
+- [x] Fake `gh` log shows no `api user` call and `--repo o/r` on every `pr` call
+- [x] Missing `--pr` or `--repo` exits 1 with usage
+- [x] Author == login posts event COMMENT with the inherited own-PR footer
+- [x] Gate check passes: `bash tests/run.sh`
+- [x] Test count: 12 tests pass
 
 **Tests**: unit
 **Gate**: quick
