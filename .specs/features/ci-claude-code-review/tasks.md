@@ -413,7 +413,7 @@ Proof: run unit | ok - readme: caveats
 ## Handoff
 
 **Settled mid-build:** none
-**Dispatched:** none
+**Dispatched:** Verifier (independent sub-agent) at HEAD 286e1d9, range 38797b7^..HEAD - sent
 **Walked:** smoke PR https://github.com/Ronnasayd/claude-pr-review-smoke/pull/1 (private test repo, caller file on main, CLAUDE_TOKENS set). Round 1 on e18f1af: run https://github.com/Ronnasayd/claude-pr-review-smoke/actions/runs/43115342113 success, review https://github.com/Ronnasayd/claude-pr-review-smoke/pull/1#pullrequestreview-5866364859 (COMMENT, F1 should-fix, F2 nit, Portuguese, marker). Round 2 on f81be5a: run https://github.com/Ronnasayd/claude-pr-review-smoke/actions/runs/43115716567 success, review https://github.com/Ronnasayd/claude-pr-review-smoke/pull/1#pullrequestreview-5866398646 (APPROVE, Resolution table F1/F2 resolved). `/the-judge` loaded from ~/.claude/skills; prompt fallback not needed. `bash tests/smoke.sh Ronnasayd/claude-pr-review-smoke 1` -> PASS. The private smoke repo needs the gh account Ronnasayd: `GH_TOKEN=$(gh auth token --user Ronnasayd)`.
 
 ---
