@@ -408,12 +408,18 @@ Proof: run unit | ok - readme: re-sync and divergences
 **C33** - README states token expiry, terms of use, Bash exposure, no dependency install and heavier quota use (CCR-28, AC 3)
 Proof: run unit | ok - readme: caveats
 
+**C34** - `post_review.py` exits 1 and posts nothing when `gh pr view` fails, for an unauthenticated `gh` or a missing PR (CCR-17, AC 7)
+Proof: run unit | ok - post_review: unauthenticated gh or missing pr exits without posting
+
+**C35** - A `CLAUDE_TOKENS` value with newlines between entries keeps every entry reachable (CCR-06, AC 1; CCR-07, AC 2)
+Proof: run unit | ok - pick_token: newline inside the secret does not drop entries
+
 ---
 
 ## Handoff
 
 **Settled mid-build:** none
-**Dispatched:** Verifier (independent sub-agent) at HEAD 286e1d9, range 38797b7^..HEAD - sent
+**Dispatched:** Verifier (independent sub-agent) at HEAD 286e1d9, range 38797b7^..HEAD - returned FAIL (9 findings)
 **Walked:** smoke PR https://github.com/Ronnasayd/claude-pr-review-smoke/pull/1 (private test repo, caller file on main, CLAUDE_TOKENS set). Round 1 on e18f1af: run https://github.com/Ronnasayd/claude-pr-review-smoke/actions/runs/43115342113 success, review https://github.com/Ronnasayd/claude-pr-review-smoke/pull/1#pullrequestreview-5866364859 (COMMENT, F1 should-fix, F2 nit, Portuguese, marker). Round 2 on f81be5a: run https://github.com/Ronnasayd/claude-pr-review-smoke/actions/runs/43115716567 success, review https://github.com/Ronnasayd/claude-pr-review-smoke/pull/1#pullrequestreview-5866398646 (APPROVE, Resolution table F1/F2 resolved). `/the-judge` loaded from ~/.claude/skills; prompt fallback not needed. `bash tests/smoke.sh Ronnasayd/claude-pr-review-smoke 1` -> PASS. The private smoke repo needs the gh account Ronnasayd: `GH_TOKEN=$(gh auth token --user Ronnasayd)`.
 
 ---

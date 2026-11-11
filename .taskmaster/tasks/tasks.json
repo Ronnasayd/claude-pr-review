@@ -15,7 +15,7 @@
           "wave": 1,
           "onCriticalPath": true
         },
-        "updatedAt": "2026-11-11T22:25:52.390Z"
+        "updatedAt": "2026-11-11T23:06:56.423Z"
       },
       {
         "id": "2",
@@ -47,7 +47,7 @@
           "wave": 3,
           "onCriticalPath": true
         },
-        "updatedAt": "2026-11-11T22:29:41.364Z"
+        "updatedAt": "2026-11-11T23:06:56.424Z"
       },
       {
         "id": "4",
@@ -79,7 +79,7 @@
           "wave": 5,
           "onCriticalPath": true
         },
-        "updatedAt": "2026-11-11T22:30:48.975Z"
+        "updatedAt": "2026-11-11T23:06:56.427Z"
       },
       {
         "id": "6",
@@ -95,7 +95,7 @@
           "wave": 6,
           "onCriticalPath": true
         },
-        "updatedAt": "2026-11-11T22:32:22.130Z"
+        "updatedAt": "2026-11-11T23:06:56.429Z"
       },
       {
         "id": "7",
@@ -111,7 +111,7 @@
           "wave": 7,
           "onCriticalPath": true
         },
-        "updatedAt": "2026-11-11T22:33:33.831Z"
+        "updatedAt": "2026-11-11T23:06:56.430Z"
       },
       {
         "id": "8",
@@ -175,12 +175,12 @@
           "wave": 11,
           "onCriticalPath": true
         },
-        "updatedAt": "2026-11-11T22:58:37.225Z"
+        "updatedAt": "2026-11-11T23:06:56.431Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-11T22:58:37.225Z",
+      "lastModified": "2026-11-11T23:06:56.431Z",
       "taskCount": 11,
       "completedCount": 11,
       "tags": ["ci-claude-code-review"]
