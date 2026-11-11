@@ -26,16 +26,24 @@ wf_no_id_token() {
   ! grep -q 'id-token' "$W"
 }
 
+# invariant: all three skip conditions must hold together; asserting substrings would accept `||`.
+JOB_IF="!github.event.pull_request.draft && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.user.login != 'dependabot[bot]'"
+
+job_if_exact() { [ "$(wq '.jobs.review.if')" = "\${{ $JOB_IF }}" ]; }
+
 wf_skips_drafts() {
-  wq '.jobs.review.if' | grep -qF '!github.event.pull_request.draft'
+  job_if_exact
+  case $JOB_IF in '!github.event.pull_request.draft && '*) ;; *) false ;; esac
 }
 
 wf_skips_forks() {
-  wq '.jobs.review.if' | grep -qF 'github.event.pull_request.head.repo.full_name == github.repository'
+  job_if_exact
+  case $JOB_IF in *' && github.event.pull_request.head.repo.full_name == github.repository && '*) ;; *) false ;; esac
 }
 
 wf_skips_dependabot() {
-  wq '.jobs.review.if' | grep -qF "github.event.pull_request.user.login != 'dependabot[bot]'"
+  job_if_exact
+  case $JOB_IF in *" && github.event.pull_request.user.login != 'dependabot[bot]'") ;; *) false ;; esac
 }
 
 wf_concurrency() {
