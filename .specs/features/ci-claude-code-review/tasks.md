@@ -255,9 +255,9 @@ T9 → T10 → T11
 
 **Done when**:
 
-- [ ] Assertions pass for each item of CCR-26, CCR-27, CCR-28
-- [ ] Gate check passes: `bash tests/run.sh`
-- [ ] Test count: 47 tests pass
+- [x] Assertions pass for each item of CCR-26, CCR-27, CCR-28
+- [x] Gate check passes: `bash tests/run.sh`
+- [x] Test count: 47 tests pass
 
 **Tests**: unit
 **Gate**: quick
