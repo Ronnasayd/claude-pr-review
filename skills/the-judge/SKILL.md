@@ -41,22 +41,23 @@ Verdict mapping: any 🔴 present, REQUEST_CHANGES. Zero 🔴 and zero 🟠, APP
 
 ### Step 0: Resolve context
 
+This copy runs unattended in CI. The prompt names the PR and the repository (`Review PR #<number> in <owner>/<repo>`): pass them to every call and never infer the PR from the checked-out branch. Your own login is `$JUDGE_BOT_LOGIN` (default `github-actions[bot]`); a bot token cannot call `GET /user`. No human is watching: when a precondition fails (`gh` unauthenticated, PR not found, gate still failing, submission rejected), stop and report the reason in the output; the job log carries it.
+
 ```bash
-gh pr view --json number,title,body,author,url,baseRefName,headRefName,additions,deletions,changedFiles
-gh api user --jq .login
-gh pr diff <number>
-gh pr view <number> --json files --jq '.files[].path'
+gh pr view <number> --repo <owner>/<repo> --json number,title,body,author,url,baseRefName,headRefName,additions,deletions,changedFiles
+gh pr diff <number> --repo <owner>/<repo>
+gh pr view <number> --repo <owner>/<repo> --json files --jq '.files[].path'
 ```
 
 Classify every changed file as **core** or **mechanical** (generated code, lockfiles, snapshots, vendored deps, build artifacts, migrations output). Mechanical files are skipped and listed in the summary. Detect moved code: 3+ consecutive lines deleted in one place and added identically elsewhere is a move, not new code; do not re-review it as new.
 
-Determine the round. Fetch your own previous reviews on this PR:
+Determine the round. Fetch your previous reviews on this PR: reviews authored by your login whose body carries the marker `<!-- the-judge -->`, which `post_review.py` appends (other actions also post as `github-actions[bot]`):
 
 ```bash
-gh api repos/{owner}/{repo}/pulls/{number}/reviews --jq '[.[] | select(.user.login=="<gh-login>") | {id, submitted_at, body}]'
+gh api 'repos/<owner>/<repo>/pulls/<number>/reviews?per_page=100' --jq '[.[] | select(.user.login == (env.JUDGE_BOT_LOGIN // "github-actions[bot]") and (.body | contains("<!-- the-judge -->"))) | {id, submitted_at, commit_id, body}]'
 ```
 
-No previous review: this is round 1, run the full workflow. Previous review exists: this is round N, load the findings ledger (the ID table) from the latest previous summary and follow the Convergence Contract instead of a full re-run.
+The round is the number of such reviews plus one. No such review: this is round 1, run the full workflow. Otherwise this is round N: the last reviewed commit is the `commit_id` of the latest one (by `submitted_at`); load the findings ledger (the ID table) from its summary and follow the Convergence Contract instead of a full re-run.
 
 If the diff exceeds roughly 400 changed lines in core files and the harness supports subagents, run the Step 3 passes as parallel subagents. Otherwise run them sequentially. Never make subagent support a requirement.
 
@@ -67,7 +68,7 @@ Detect and run the repo's own checks: lint, typecheck, and tests focused on chan
 Then run the deterministic bypass scan:
 
 ```bash
-gh pr diff <number> | python3 scripts/scan_bypasses.py
+gh pr diff <number> --repo <owner>/<repo> | python3 ~/.claude/skills/the-judge/scripts/scan_bypasses.py
 ```
 
 It prints `path:line  category  content` for every bypass marker added by the diff (suppression directives, dodged tests, TLS and type-check bypasses, swallowed errors, sleep-as-synchronization). Scan hits are candidates for Pass F, not findings: a suppression carrying a justification and an issue link is acceptable; a naked one is not. The scan exists so zero LLM tokens are spent detecting what a regex detects.
@@ -134,7 +135,7 @@ Rules the gate enforces (write to them from the start): body starts with the sev
 ### Step 6: Gate
 
 ```bash
-python3 scripts/review_gate.py findings.json
+python3 ~/.claude/skills/the-judge/scripts/review_gate.py findings.json
 ```
 
 Fix every reported violation and re-run until exit code 0. The gate is deterministic; arguing with it is arguing with a regex.
@@ -142,10 +143,10 @@ Fix every reported violation and re-run until exit code 0. The gate is determini
 ### Step 7: Post
 
 ```bash
-python3 scripts/post_review.py findings.json
+python3 ~/.claude/skills/the-judge/scripts/post_review.py findings.json --pr <number> --repo <owner>/<repo>
 ```
 
-Posts everything as one review (single API call: summary body, verdict event, positioned inline comments), handles the own-PR fallback, prints the review URL. Inline comments only anchor on lines present in the diff; the script tells you which comment failed if GitHub rejects an anchor.
+Posts everything as one review (single API call: summary body, verdict event, positioned inline comments), handles the own-PR fallback, appends the `<!-- the-judge -->` marker, retries once as COMMENT with an intended-verdict footer when GitHub rejects APPROVE or REQUEST_CHANGES, prints the review URL. Inline comments only anchor on lines present in the diff; the script tells you which comment failed if GitHub rejects an anchor.
 
 ## Summary Body Template
 
@@ -189,7 +190,7 @@ The Judge is decisive: it converges reviews instead of stretching them. Round 1 
 
 **Declined findings.** When the author declines with a reason, first consider that they are closer to the code and may be right; if the reasoning holds from a code-health perspective, record declined-accepted and drop it permanently. If it does not hold, re-argue once with new evidence, at most once. Still unresolved after that: mark it open, state that the disagreement moves out of the review thread, and stop re-raising. Comment threads do not resolve philosophy.
 
-**Round cap.** By round 3, every remaining open finding is either fixed, converted to a follow-up issue by agreement, or escalated out of the thread. The Judge never runs a fourth round on the same finding set.
+**Round cap.** By round 3, every remaining open finding is either fixed, converted to a follow-up issue by agreement, or escalated out of the thread. In CI every push starts a round; round 4 and later post only the Resolution table and new 🔴 findings.
 
 **Approval bar.** Approve as soon as the PR definitely improves overall code health, even if imperfect; perfect code does not exist, only better code. Unresolved 🟡 never blocks an APPROVE (approve with nits). Withholding approval to extract polish beyond the severity table is scope creep by the reviewer.
 
@@ -224,15 +225,15 @@ Result: a short review with only the Resolution table and TL;DR. No new comments
 ## Troubleshooting
 
 ### Error: HTTP 422 on review submission
-Cause: APPROVE/REQUEST_CHANGES on your own PR, or a comment anchored to a line not in the diff.
-Solution: `post_review.py` auto-falls back to COMMENT for own PRs. For anchor failures, move the comment to a changed line shown in the patch, or drop `line` and fold it into the summary.
+Cause: APPROVE/REQUEST_CHANGES on your own PR or blocked for GitHub Actions, or a comment anchored to a line not in the diff.
+Solution: `post_review.py` auto-falls back to COMMENT for own PRs and retries a rejected verdict once as COMMENT. For anchor failures, move the comment to a changed line shown in the patch, or drop `line` and fold it into the summary.
 
 ### Error: gh not authenticated
-Cause: no `gh auth login` session.
-Solution: ask the user to run `gh auth status` and authenticate. Do not attempt tokenless calls.
+Cause: `GH_TOKEN` missing or lacking `pull-requests: write`.
+Solution: stop and report the reason in the output; the job log carries it. Do not attempt tokenless calls.
 
-### Error: no PR for the current branch
-Cause: branch never pushed or PR not opened.
+### Error: PR not found
+Cause: the PR number or repository from the prompt does not exist or is not readable with the job token.
 Solution: report it and stop. Opening PRs is out of scope for The Judge (that is a different job).
 
 ### Gate keeps failing on the same body

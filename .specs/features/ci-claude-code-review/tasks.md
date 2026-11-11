@@ -190,9 +190,9 @@ T9 → T10 → T11
 
 **Done when**:
 
-- [ ] `tests/test_skill.sh` asserts: no `gh api user`; no `ask the user`; marker query with `commit_id` present; round rule text present; no cwd-relative `python3 scripts/`; post command has `--pr` and `--repo`; round 4+ sentence present and "never runs a fourth round" absent; sections Non-Negotiables, Severity and Verdict, Steps 2-5 byte-equal to aipp; Convergence Contract equal to aipp except the replaced sentence
-- [ ] Gate check passes: `bash tests/run.sh`
-- [ ] Test count: 26 tests pass
+- [x] `tests/test_skill.sh` asserts: no `gh api user`; no `ask the user`; marker query with `commit_id` present; round rule text present; no cwd-relative `python3 scripts/`; post command has `--pr` and `--repo`; round 4+ sentence present and "never runs a fourth round" absent; sections Non-Negotiables, Severity and Verdict, Steps 2-5 byte-equal to aipp; Convergence Contract equal to aipp except the replaced sentence
+- [x] Gate check passes: `bash tests/run.sh`
+- [x] Test count: 26 tests pass
 
 **Tests**: unit
 **Gate**: quick
