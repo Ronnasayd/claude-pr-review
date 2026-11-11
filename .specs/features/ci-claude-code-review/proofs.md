@@ -1,9 +1,9 @@
 # ci-claude-code-review proofs
 
-**HEAD**: 286e1d9
-**Tree**: clean
+**HEAD**: 8af4f5d
+**Tree**: dirty - .p.out
 **Shell**: /bin/sh
-**Result**: 35 pass, 0 fail
+**Result**: 37 pass, 0 fail
 
 | Check | Proof                                                                                                            | Result |
 | ----- | ---------------------------------------------------------------------------------------------------------------- | ------ |
@@ -40,6 +40,8 @@
 | C31   | `run unit / ok - readme: one-time setup`                                                                         | pass   |
 | C32   | `run unit / ok - readme: re-sync and divergences`                                                                | pass   |
 | C33   | `run unit / ok - readme: caveats`                                                                                | pass   |
+| C34   | `run unit / ok - post_review: unauthenticated gh or missing pr exits without posting`                            | pass   |
+| C35   | `run unit / ok - pick_token: newline inside the secret does not drop entries`                                    | pass   |
 | Build | `docker run --rm -v "$PWD:/repo" -w /repo rhysd/actionlint:1.7.12 .github/workflows/claude-review.yml caller/cl` | pass   |
 | Build | `bash tests/run.sh`                                                                                              | pass   |
 
@@ -62,7 +64,7 @@ ok - caller: one job
 ok - caller: uses central workflow at v1 with permissions and secret
 ok - caller: no secrets inherit
 ok - caller: central repo never reviews itself
-# passed 48, failed 0
+# passed 50, failed 0
 ```
 
 `bash tests/smoke.sh Ronnasayd/claude-pr-review-smoke 1` - exit 0
