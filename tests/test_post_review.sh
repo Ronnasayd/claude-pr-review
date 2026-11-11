@@ -84,3 +84,25 @@ t "post_review: no gh api user and default bot login" post_no_api_user_default_l
 t "post_review: bot login taken from JUDGE_BOT_LOGIN" post_login_from_env
 t "post_review: requires and uses pr and repo" post_requires_and_uses_pr_and_repo
 t "post_review: own pr posts as comment" post_own_pr_comment
+
+# ends_with_marker: payload 1 body ends with a blank line and the hidden marker.
+ends_with_marker() {
+  python3 -c 'import json,sys; b=json.load(open(sys.argv[1]))["body"]; sys.exit(not b.endswith("\n\n<!-- the-judge -->"))' "$FG/payload-1.json"
+}
+
+post_body_ends_with_marker() {
+  post_setup APPROVE
+  FAKE_GH_AUTHOR=alice post --pr 7 --repo o/r
+  ends_with_marker
+  payload .body | grep -q '^## TL;DR$'
+}
+
+post_marker_after_own_pr_footer() {
+  post_setup APPROVE
+  FAKE_GH_AUTHOR='github-actions[bot]' post --pr 7 --repo o/r
+  ends_with_marker
+  python3 -c 'import json,sys; b=json.load(open(sys.argv[1]))["body"]; sys.exit(not b.endswith("own PR._\n\n<!-- the-judge -->"))' "$FG/payload-1.json"
+}
+
+t "post_review: body ends with marker" post_body_ends_with_marker
+t "post_review: marker follows own pr footer" post_marker_after_own_pr_footer

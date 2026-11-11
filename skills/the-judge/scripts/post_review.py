@@ -21,6 +21,7 @@ import tempfile
 
 USAGE = "usage: post_review.py findings.json --pr N --repo owner/repo"
 DEFAULT_LOGIN = "github-actions[bot]"
+MARKER = "<!-- the-judge -->"
 
 
 def run(args: list[str]) -> tuple[int, str, str]:
@@ -119,7 +120,7 @@ def build_payload(data: dict, author: str) -> dict:
         for f in data["findings"]
         if f.get("severity") != "pre-existing" and f.get("line")
     ]
-    return {"body": body, "event": event, "comments": comments}
+    return {"body": f"{body}\n\n{MARKER}", "event": event, "comments": comments}
 
 
 def submit(repo: str, number: int, payload: dict) -> tuple[int, str, str]:

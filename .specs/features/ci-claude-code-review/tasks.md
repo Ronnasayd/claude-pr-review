@@ -145,9 +145,9 @@ T9 → T10 → T11
 
 **Done when**:
 
-- [ ] Payload body captured by fake `gh` ends with `<!-- the-judge -->`, including with the own-PR footer
-- [ ] Gate check passes: `bash tests/run.sh`
-- [ ] Test count: 14 tests pass
+- [x] Payload body captured by fake `gh` ends with `<!-- the-judge -->`, including with the own-PR footer
+- [x] Gate check passes: `bash tests/run.sh`
+- [x] Test count: 14 tests pass
 
 **Tests**: unit
 **Gate**: quick
