@@ -64,6 +64,11 @@ post_requires_and_uses_pr_and_repo() {
   [ "$rc" -eq 1 ]
   grep -q 'usage:' "$FG/err"
   [ ! -s "$FG/log" ]
+  rc=0
+  post --pr --repo o/r || rc=$?
+  [ "$rc" -eq 1 ]
+  grep -q 'usage:' "$FG/err"
+  [ ! -s "$FG/log" ]
   post --pr 7 --repo o/r
   grep -qx 'pr view 7 --repo o/r --json number,author' "$FG/log"
   [ "$(grep -c '^pr ' "$FG/log")" -eq "$(grep -c '^pr .*--repo o/r' "$FG/log")" ]
@@ -164,3 +169,18 @@ t "post_review: rejected approve retries as comment" post_rejected_verdict_retri
 t "post_review: rejected retry exits 1" post_rejected_retry_exits_1
 t "post_review: rejected comment exits without retry" post_rejected_comment_no_retry
 t "post_review: gate failure posts nothing" post_gate_failure_posts_nothing
+
+post_view_failure_posts_nothing() {
+  local msg rc
+  post_setup APPROVE
+  for msg in "gh: To use GitHub CLI in a GitHub Actions workflow, set the GH_TOKEN environment variable." \
+    "GraphQL: Could not resolve to a PullRequest with the number of 7. (repository.pullRequest)"; do
+    rc=0
+    FAKE_GH_VIEW_FAIL=$msg post --pr 7 --repo o/r || rc=$?
+    [ "$rc" -eq 1 ]
+    grep -qF "$msg" "$FG/err"
+    [ "$(posts)" -eq 0 ]
+  done
+}
+
+t "post_review: unauthenticated gh or missing pr exits without posting" post_view_failure_posts_nothing

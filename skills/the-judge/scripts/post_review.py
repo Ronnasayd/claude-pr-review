@@ -63,9 +63,10 @@ def flag(argv: list[str], name: str) -> str | None:
     Returns:
         The flag's value, or None when the flag or its value is missing.
     """
-    if name in argv[:-1]:
-        return argv[argv.index(name) + 1]
-    return None
+    if name not in argv[:-1]:
+        return None
+    value = argv[argv.index(name) + 1]
+    return None if value.startswith("--") else value
 
 
 def parse_args(argv: list[str]) -> tuple[str, str, str]:
