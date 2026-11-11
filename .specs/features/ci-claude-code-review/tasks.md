@@ -211,10 +211,10 @@ T9 → T10 → T11
 
 **Done when**:
 
-- [ ] actionlint exits 0
-- [ ] `yq` assertions pass for: only `CLAUDE_TOKENS` secret, required; permissions exactly two; job `if:`; concurrency group and cancel; `_ci` checkout repository/ref/path, `persist-credentials: false`, no `token:`; install step copies to `~/.claude/skills` and removes `_ci`; picker step id and env; no `GITHUB_ENV` write anywhere; action inputs (oauth token from `steps.pick.outputs.token`, `github_token`, prompt, `--max-turns 60`, `--allowedTools` with `Write,Edit`); step env `JUDGE_BOT_LOGIN`; no `id-token`
-- [ ] Gate check passes: Build
-- [ ] Test count: 39 tests pass
+- [x] actionlint exits 0
+- [x] `yq` assertions pass for: only `CLAUDE_TOKENS` secret, required; permissions exactly two; job `if:`; concurrency group and cancel; `_ci` checkout repository/ref/path, `persist-credentials: false`, no `token:`; install step copies to `~/.claude/skills` and removes `_ci`; picker step id and env; no `GITHUB_ENV` write anywhere; action inputs (oauth token from `steps.pick.outputs.token`, `github_token`, prompt, `--max-turns 60`, `--allowedTools` with `Write,Edit`); step env `JUDGE_BOT_LOGIN`; no `id-token`
+- [x] Gate check passes: Build
+- [x] Test count: 39 tests pass
 
 **Tests**: unit
 **Gate**: build

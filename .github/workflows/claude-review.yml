@@ -1,0 +1,47 @@
+name: Claude review
+
+on:
+  workflow_call:
+    secrets:
+      CLAUDE_TOKENS:
+        required: true
+
+jobs:
+  review:
+    if: ${{ !github.event.pull_request.draft && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.user.login != 'dependabot[bot]' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    concurrency:
+      group: claude-review-${{ github.repository }}-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      # invariant: ref stays equal to the tag callers use; the public repo needs no token.
+      - uses: actions/checkout@v7
+        with:
+          repository: Ronnasayd/claude-pr-review
+          ref: v1
+          path: _ci
+          persist-credentials: false
+      - name: Pick token
+        id: pick
+        run: bash _ci/scripts/pick-token.sh
+        env:
+          TOKENS: ${{ secrets.CLAUDE_TOKENS }}
+      # why: the action restores .claude/ from the base branch, so the skill lives in the user scope.
+      - name: Install skill
+        run: mkdir -p ~/.claude/skills && cp -r _ci/skills/the-judge ~/.claude/skills/ && rm -rf _ci
+      - uses: anthropics/claude-code-action@v1
+        env:
+          JUDGE_BOT_LOGIN: github-actions[bot]
+        with:
+          claude_code_oauth_token: ${{ steps.pick.outputs.token }}
+          github_token: ${{ github.token }}
+          prompt: "/the-judge Review PR #${{ github.event.pull_request.number }} in ${{ github.repository }}. Write the review in Portuguese."
+          claude_args: >-
+            --max-turns 60
+            --allowedTools "Skill,Read,Write,Edit,Glob,Grep,WebSearch,WebFetch,Bash"
