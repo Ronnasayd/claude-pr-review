@@ -276,9 +276,9 @@ T9 → T10 → T11
 
 **Done when**:
 
-- [ ] `git ls-remote origin 'refs/tags/v1^{}' refs/tags/v1` shows the `HEAD` sha
-- [ ] `gh api repos/Ronnasayd/claude-pr-review --jq .visibility` prints `public`
-- [ ] `gh secret list -R Ronnasayd/claude-pr-review` prints nothing
+- [x] `git ls-remote origin 'refs/tags/v1^{}' refs/tags/v1` shows the `HEAD` sha
+- [x] `gh api repos/Ronnasayd/claude-pr-review --jq .visibility` prints `public`
+- [x] `gh secret list -R Ronnasayd/claude-pr-review` prints nothing
 
 **Tests**: none
 **Gate**: build
@@ -297,8 +297,8 @@ T9 → T10 → T11
 
 **Done when**:
 
-- [ ] `bash tests/smoke.sh Ronnasayd/claude-pr-review-smoke 1` exits 0: latest run on the PR concluded `success`; two reviews by `github-actions[bot]` with `<!-- the-judge -->`; the second contains a `Resolution` section
-- [ ] Run URL and review URLs recorded in `## Handoff` under `**Walked:**`
+- [x] `bash tests/smoke.sh Ronnasayd/claude-pr-review-smoke 1` exits 0: latest run on the PR concluded `success`; two reviews by `github-actions[bot]` with `<!-- the-judge -->`; the second contains a `Resolution` section
+- [x] Run URL and review URLs recorded in `## Handoff` under `**Walked:**`
 
 **Tests**: e2e
 **Gate**: full
@@ -414,7 +414,7 @@ Proof: run unit | ok - readme: caveats
 
 **Settled mid-build:** none
 **Dispatched:** none
-**Walked:** none
+**Walked:** smoke PR https://github.com/Ronnasayd/claude-pr-review-smoke/pull/1 (private test repo, caller file on main, CLAUDE_TOKENS set). Round 1 on e18f1af: run https://github.com/Ronnasayd/claude-pr-review-smoke/actions/runs/43115342113 success, review https://github.com/Ronnasayd/claude-pr-review-smoke/pull/1#pullrequestreview-5866364859 (COMMENT, F1 should-fix, F2 nit, Portuguese, marker). Round 2 on f81be5a: run https://github.com/Ronnasayd/claude-pr-review-smoke/actions/runs/43115716567 success, review https://github.com/Ronnasayd/claude-pr-review-smoke/pull/1#pullrequestreview-5866398646 (APPROVE, Resolution table F1/F2 resolved). `/the-judge` loaded from ~/.claude/skills; prompt fallback not needed. `bash tests/smoke.sh Ronnasayd/claude-pr-review-smoke 1` -> PASS. The private smoke repo needs the gh account Ronnasayd: `GH_TOKEN=$(gh auth token --user Ronnasayd)`.
 
 ---
 
