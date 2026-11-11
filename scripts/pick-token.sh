@@ -4,7 +4,8 @@
 set -euo pipefail
 
 tokens=()
-IFS=';' read -ra parts <<<"${TOKENS:-}"
+# why: -d '' reads the whole secret; plain read stops at the first newline and drops later tokens.
+IFS=';' read -rd '' -a parts <<<"${TOKENS:-}" || true
 for p in "${parts[@]}"; do
   p="${p#"${p%%[![:space:]]*}"}"
   p="${p%"${p##*[![:space:]]}"}"

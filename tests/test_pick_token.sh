@@ -24,8 +24,16 @@ pick_single() {
 
 pick_trims_and_skips() {
   local got
-  got=$(draws " tok1 ; tok2 " 50 | sort -u | tr '\n' ' ')
+  got=$(draws " tok1 ; ;tok2 ; " 50 | sort -u | tr '\n' ' ')
   [ "$got" = "tok1 tok2 " ]
+}
+
+pick_newline_inside_secret() {
+  local got
+  got=$(draws $'tok1;\ntok2\n' 50 | sort -u | tr '\n' ' ')
+  [ "$got" = "tok1 tok2 " ]
+  pick $'tok1;\ntok2'
+  grep -qx 'Using token [12] of 2' "$WORK/pick.out"
 }
 
 pick_double_and_trailing_separators() {
@@ -62,6 +70,7 @@ pick_fails_on() {
 
 t "pick_token: single token returned" pick_single
 t "pick_token: trims whitespace and skips empty entries" pick_trims_and_skips
+t "pick_token: newline inside the secret does not drop entries" pick_newline_inside_secret
 t "pick_token: double and trailing separators yield no empty token" pick_double_and_trailing_separators
 t "pick_token: every token reachable" pick_every_token_reachable
 t "pick_token: masks token and logs index only" pick_masks_and_logs_index
