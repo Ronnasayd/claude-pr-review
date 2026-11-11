@@ -149,7 +149,7 @@
         "id": "10",
         "title": "Publish the central repo and tag v1",
         "description": "Create public Ronnasayd/claude-pr-review on GitHub, push main, create lightweight tag v1. Each remote action needs the user's explicit go-ahead at the time.",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": ["9"],
         "details": "Where: GitHub remote (no file). Reuses: none. Requirement: CCR-24, CCR-25. Done when: git ls-remote origin 'refs/tags/v1^{}' refs/tags/v1 shows the HEAD sha; gh api repos/Ronnasayd/claude-pr-review --jq .visibility prints public; gh secret list -R Ronnasayd/claude-pr-review prints nothing. Tests: none. Gate: build. Commit: none (remote-only task).",
@@ -158,13 +158,14 @@
         "metadata": {
           "wave": 10,
           "onCriticalPath": true
-        }
+        },
+        "updatedAt": "2026-11-11T22:41:44.110Z"
       },
       {
         "id": "11",
         "title": "Smoke PR on a test repo",
         "description": "tests/smoke.sh <owner/repo> <pr> plus a run on test repo Ronnasayd/claude-pr-review-smoke that has the caller file and CLAUDE_TOKENS (user creates the secret with real claude setup-token tokens). Open a PR, then push a second commit; tests/smoke.sh asserts the outcome. If /the-judge is not recognised, apply the design's prompt fallback (amending CCR-04, C4 and its assertion), move v1, and push a new commit to the PR; never a re-run, which reuses the first attempt's workflow SHA.",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": ["10"],
         "details": "Where: tests/smoke.sh. Reuses: none. Requirement: CCR-01, CCR-13. Done when: bash tests/smoke.sh Ronnasayd/claude-pr-review-smoke 1 exits 0 (latest run on the PR concluded success; two reviews by github-actions[bot] with <!-- the-judge -->; the second contains a Resolution section); run URL and review URLs recorded in ## Handoff under **Walked:**. Tests: e2e. Gate: full (bash tests/run.sh; bash tests/smoke.sh Ronnasayd/claude-pr-review-smoke 1). Commit: test(smoke): end-to-end review on a test repo.",
@@ -173,14 +174,15 @@
         "metadata": {
           "wave": 11,
           "onCriticalPath": true
-        }
+        },
+        "updatedAt": "2026-11-11T22:58:37.225Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-11T22:35:49.658Z",
+      "lastModified": "2026-11-11T22:58:37.225Z",
       "taskCount": 11,
-      "completedCount": 9,
+      "completedCount": 11,
       "tags": ["ci-claude-code-review"]
     }
   }
