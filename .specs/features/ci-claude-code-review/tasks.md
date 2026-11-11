@@ -101,9 +101,9 @@ T9 → T10 → T11
 
 **Done when**:
 
-- [ ] Verbatim-file test passes
-- [ ] Gate check passes: `bash tests/run.sh`
-- [ ] Test count: 8 tests pass
+- [x] Verbatim-file test passes
+- [x] Gate check passes: `bash tests/run.sh`
+- [x] Test count: 8 tests pass
 
 **Tests**: unit
 **Gate**: quick
