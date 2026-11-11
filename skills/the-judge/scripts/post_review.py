@@ -22,6 +22,7 @@ import tempfile
 USAGE = "usage: post_review.py findings.json --pr N --repo owner/repo"
 DEFAULT_LOGIN = "github-actions[bot]"
 MARKER = "<!-- the-judge -->"
+RETRYABLE_EVENTS = ("APPROVE", "REQUEST_CHANGES")
 
 
 def run(args: list[str]) -> tuple[int, str, str]:
@@ -94,12 +95,13 @@ def check_gate(findings_path: str) -> None:
         sys.exit(f"refusing to post, gate failed:\n{out}{err}")
 
 
-def build_payload(data: dict, author: str) -> dict:
-    """Build the review payload, downgrading the verdict on the bot's own PR.
+def build_payload(data: dict, author: str, *, rejected: bool = False) -> dict:
+    """Build the review payload, downgrading the verdict when it cannot post.
 
     Args:
         data: The parsed findings.json.
         author: Login of the PR author.
+        rejected: GitHub already rejected the verdict event once.
 
     Returns:
         The payload with body, event and inline comments.
@@ -108,7 +110,14 @@ def build_payload(data: dict, author: str) -> dict:
     body = data["summary"]
     me = os.environ.get("JUDGE_BOT_LOGIN") or DEFAULT_LOGIN
     event = verdict
-    if me == author and verdict != "COMMENT":
+    if rejected:
+        event = "COMMENT"
+        body = (
+            f"{body}\n\n---\n_Intended verdict: {verdict}. "
+            "Posted as a comment because GitHub rejected the "
+            f"{verdict} event for this repository._"
+        )
+    elif me == author and verdict != "COMMENT":
         event = "COMMENT"
         body = (
             f"{body}\n\n---\n_Intended verdict: **{verdict}**. "
@@ -165,6 +174,11 @@ def main() -> None:
     comments = payload["comments"]
 
     rc, out, err = submit(repo, pr["number"], payload)
+    # why: no official source names the status GitHub returns when Actions may
+    # not approve, so the retry keys on the event type, not the status code.
+    if rc != 0 and payload["event"] in RETRYABLE_EVENTS:
+        payload = build_payload(data, pr["author"]["login"], rejected=True)
+        rc, out, err = submit(repo, pr["number"], payload)
     if rc != 0:
         msg = err or out
         if "422" in msg and comments:

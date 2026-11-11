@@ -166,12 +166,12 @@ T9 → T10 → T11
 
 **Done when**:
 
-- [ ] Fake `gh` rejecting the first POST: two POSTs, second has event COMMENT and the footer, exit 0
-- [ ] Fake `gh` rejecting both POSTs: exit 1, stderr has `review submission failed` and the anchors
-- [ ] Rejection with event COMMENT: one POST only, exit 1
-- [ ] Gate failure: no POST, exit 1 with `refusing to post, gate failed`
-- [ ] Gate check passes: `bash tests/run.sh`
-- [ ] Test count: 18 tests pass
+- [x] Fake `gh` rejecting the first POST: two POSTs, second has event COMMENT and the footer, exit 0
+- [x] Fake `gh` rejecting both POSTs: exit 1, stderr has `review submission failed` and the anchors
+- [x] Rejection with event COMMENT: one POST only, exit 1
+- [x] Gate failure: no POST, exit 1 with `refusing to post, gate failed`
+- [x] Gate check passes: `bash tests/run.sh`
+- [x] Test count: 18 tests pass
 
 **Tests**: unit
 **Gate**: quick

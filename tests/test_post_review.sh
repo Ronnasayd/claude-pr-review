@@ -106,3 +106,61 @@ post_marker_after_own_pr_footer() {
 
 t "post_review: body ends with marker" post_body_ends_with_marker
 t "post_review: marker follows own pr footer" post_marker_after_own_pr_footer
+
+# rejected_footer <verdict>: the CCR-15 footer text for <verdict>.
+rejected_footer() {
+  echo "Intended verdict: $1. Posted as a comment because GitHub rejected the $1 event for this repository."
+}
+
+post_rejected_verdict_retries_as_comment() {
+  local v
+  for v in APPROVE REQUEST_CHANGES; do
+    post_setup "$v"
+    FAKE_GH_POST_FAIL=1 FAKE_GH_AUTHOR=alice post --pr 7 --repo o/r
+    [ "$(posts)" -eq 2 ]
+    [ "$(payload .event 1)" = "$v" ]
+    [ "$(payload .event 2)" = COMMENT ]
+    payload .body 2 | grep -qF "$(rejected_footer "$v")"
+    ! payload .body 1 | grep -qF "$(rejected_footer "$v")"
+    python3 -c 'import json,sys; b=json.load(open(sys.argv[1]))["body"]; sys.exit(not b.endswith("\n\n<!-- the-judge -->"))' "$FG/payload-2.json"
+    [ "$(payload '.comments | length' 2)" -eq 1 ]
+    grep -q 'posted: event=COMMENT' "$FG/out"
+  done
+}
+
+post_rejected_retry_exits_1() {
+  local rc=0
+  post_setup APPROVE
+  FAKE_GH_POST_FAIL=2 FAKE_GH_AUTHOR=alice post --pr 7 --repo o/r || rc=$?
+  [ "$rc" -eq 1 ]
+  [ "$(posts)" -eq 2 ]
+  grep -q 'review submission failed' "$FG/err"
+  grep -q 'HTTP 422) attempt 2' "$FG/err"
+  grep -q 'Anchors sent: a.py:3' "$FG/err"
+}
+
+post_rejected_comment_no_retry() {
+  local rc=0
+  post_setup COMMENT
+  FAKE_GH_POST_FAIL=1 FAKE_GH_AUTHOR=alice post --pr 7 --repo o/r || rc=$?
+  [ "$rc" -eq 1 ]
+  [ "$(posts)" -eq 1 ]
+  grep -q 'review submission failed' "$FG/err"
+  grep -q 'Anchors sent: a.py:3' "$FG/err"
+}
+
+post_gate_failure_posts_nothing() {
+  local rc=0
+  post_setup REQUEST_CHANGES
+  sed -i 's/"verdict": "REQUEST_CHANGES"/"verdict": "APPROVE"/' "$FG/findings.json"
+  post --pr 7 --repo o/r || rc=$?
+  [ "$rc" -eq 1 ]
+  grep -q 'refusing to post, gate failed' "$FG/err"
+  [ "$(posts)" -eq 0 ]
+  [ ! -s "$FG/log" ]
+}
+
+t "post_review: rejected approve retries as comment" post_rejected_verdict_retries_as_comment
+t "post_review: rejected retry exits 1" post_rejected_retry_exits_1
+t "post_review: rejected comment exits without retry" post_rejected_comment_no_retry
+t "post_review: gate failure posts nothing" post_gate_failure_posts_nothing
