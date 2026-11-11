@@ -1,0 +1,99 @@
+{
+  "schema": 1,
+  "promote_threshold": 2,
+  "window_days": 45,
+  "quarantine_threshold": 2,
+  "next_id": 6,
+  "lessons": [
+    {
+      "id": "L-001",
+      "key": "ac_gap::bash read ra stops at the first newline read multi line secrets with read rd a true and test a value with embedded newlines",
+      "text": "Bash 'read -ra' stops at the first newline; read multi-line secrets with 'read -rd \"\" -a ... || true' and test a value with embedded newlines.",
+      "signal": "ac_gap",
+      "scope": "shell",
+      "status": "candidate",
+      "features": [
+        "ci-claude-code-review"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "scripts/pick-token.sh:8 (shell)"
+      ],
+      "created": "2026-11-11T23:08:29Z",
+      "last_seen": "2026-11-11T23:08:29Z"
+    },
+    {
+      "id": "L-002",
+      "key": "weak_test::assert a compound condition as the whole expression not per clause substrings or swapping for stays green",
+      "text": "Assert a compound condition as the whole expression, not per-clause substrings, or swapping && for || stays green.",
+      "signal": "weak_test",
+      "scope": "yaml",
+      "status": "candidate",
+      "features": [
+        "ci-claude-code-review"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "tests/test_workflows.sh:C24-C26 (yaml)"
+      ],
+      "created": "2026-11-11T23:08:29Z",
+      "last_seen": "2026-11-11T23:08:29Z"
+    },
+    {
+      "id": "L-003",
+      "key": "weak_test::give every fake cli a failure switch per call it answers so each precondition failure path in the spec has a test",
+      "text": "Give every fake CLI a failure switch per call it answers, so each precondition-failure path in the spec has a test.",
+      "signal": "weak_test",
+      "scope": "tests",
+      "status": "candidate",
+      "features": [
+        "ci-claude-code-review"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "tests/fake-gh (tests)"
+      ],
+      "created": "2026-11-11T23:08:29Z",
+      "last_seen": "2026-11-11T23:08:29Z"
+    },
+    {
+      "id": "L-004",
+      "key": "weak_test::when a skill encodes logic in a shell or jq snippet extract and run that snippet against a fixture instead of grepping its text",
+      "text": "When a skill encodes logic in a shell or jq snippet, extract and run that snippet against a fixture instead of grepping its text.",
+      "signal": "weak_test",
+      "scope": "skills",
+      "status": "candidate",
+      "features": [
+        "ci-claude-code-review"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "skills/the-judge/SKILL.md:57 (skills)"
+      ],
+      "created": "2026-11-11T23:08:29Z",
+      "last_seen": "2026-11-11T23:08:29Z"
+    },
+    {
+      "id": "L-005",
+      "key": "ac_gap::list endpoints on github need paginate when the count drives behaviour per page alone caps at 100",
+      "text": "List endpoints on GitHub need --paginate when the count drives behaviour; per_page alone caps at 100.",
+      "signal": "ac_gap",
+      "scope": "github-api",
+      "status": "candidate",
+      "features": [
+        "ci-claude-code-review"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "skills/the-judge/SKILL.md:57 (github-api)"
+      ],
+      "created": "2026-11-11T23:08:29Z",
+      "last_seen": "2026-11-11T23:08:29Z"
+    }
+  ]
+}
