@@ -54,10 +54,10 @@ Classify every changed file as **core** or **mechanical** (generated code, lockf
 Determine the round. Fetch your previous reviews on this PR: reviews authored by your login whose body carries the marker `<!-- the-judge -->`, which `post_review.py` appends (other actions also post as `github-actions[bot]`):
 
 ```bash
-gh api 'repos/<owner>/<repo>/pulls/<number>/reviews?per_page=100' --jq '[.[] | select(.user.login == (env.JUDGE_BOT_LOGIN // "github-actions[bot]") and (.body | contains("<!-- the-judge -->"))) | {id, submitted_at, commit_id, body}]'
+gh api --paginate 'repos/<owner>/<repo>/pulls/<number>/reviews?per_page=100' --jq '(env.JUDGE_BOT_LOGIN // "" | if . == "" then "github-actions[bot]" else . end) as $me | .[] | select(.user.login == $me and (.body | contains("<!-- the-judge -->"))) | {id, submitted_at, commit_id, body}'
 ```
 
-The round is the number of such reviews plus one. No such review: this is round 1, run the full workflow. Otherwise this is round N: the last reviewed commit is the `commit_id` of the latest one (by `submitted_at`); load the findings ledger (the ID table) from its summary and follow the Convergence Contract instead of a full re-run.
+It prints one JSON object per marked review, across every page. The round is the number of such reviews plus one. No such review: this is round 1, run the full workflow. Otherwise this is round N: the last reviewed commit is the `commit_id` of the latest one (by `submitted_at`); load the findings ledger (the ID table) from its summary and follow the Convergence Contract instead of a full re-run.
 
 If the diff exceeds roughly 400 changed lines in core files and the harness supports subagents, run the Step 3 passes as parallel subagents. Otherwise run them sequentially. Never make subagent support a requirement.
 
