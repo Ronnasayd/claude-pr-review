@@ -1,0 +1,187 @@
+{
+  "ci-claude-code-review": {
+    "tasks": [
+      {
+        "id": "1",
+        "title": "Token picker script with test runner",
+        "description": "scripts/pick-token.sh per design Token picker, plus tests/run.sh (runs every tests/test_*.sh, prints ok - name or not ok - name, exits non-zero on any failure) and tests/test_pick_token.sh.",
+        "status": "done",
+        "priority": "high",
+        "dependencies": [],
+        "details": "Where: scripts/pick-token.sh. Reuses: plan inline picker snippet. Requirement: CCR-06, CCR-07, CCR-08, CCR-09. Done when: tests written first and seen failing, then passing; inputs covered are tok1, tok1;tok2;tok3, ' tok1 ; tok2 ', tok1;;tok2;, empty string, and ;;; gate check passes; 7 tests pass. Tests: unit. Gate: quick (bash tests/run.sh). Commit: feat(picker): pick one random token from CLAUDE_TOKENS.",
+        "testStrategy": "unit (bash): tests/test_pick_token.sh with inputs tok1, tok1;tok2;tok3, ' tok1 ; tok2 ', tok1;;tok2;, empty string, ;; ; run via bash tests/run.sh",
+        "subtasks": [],
+        "metadata": {
+          "wave": 1,
+          "onCriticalPath": true
+        },
+        "updatedAt": "2026-11-11T22:25:52.390Z"
+      },
+      {
+        "id": "2",
+        "title": "Copy aipp the-judge verbatim",
+        "description": "Copy aipp/skills/tech-leads-club/the-judge (v1.4.0) into skills/the-judge/ unchanged; add tests/test_skill.sh asserting references/*.md, scripts/review_gate.py and scripts/scan_bypasses.py are byte-equal to the source.",
+        "status": "done",
+        "priority": "high",
+        "dependencies": ["1"],
+        "details": "Where: skills/the-judge/. Reuses: aipp the-judge v1.4.0. Requirement: CCR-18. Done when: verbatim-file test passes; gate check passes; 8 tests pass. Tests: unit. Gate: quick (bash tests/run.sh). Commit: chore(skill): vendor the-judge v1.4.0 from aipp.",
+        "testStrategy": "unit (content assertions): tests/test_skill.sh checks references/*.md, scripts/review_gate.py, scripts/scan_bypasses.py are byte-equal to aipp v1.4.0; run via bash tests/run.sh",
+        "subtasks": [],
+        "metadata": {
+          "wave": 2,
+          "onCriticalPath": true
+        },
+        "updatedAt": "2026-11-11T22:27:11.114Z"
+      },
+      {
+        "id": "3",
+        "title": "post_review.py targets --pr/--repo and drops gh api user",
+        "description": "post_review.py requires --pr N --repo o/r, calls gh pr view N --repo o/r, posts to repos/o/r/pulls/N/reviews, takes its login from JUDGE_BOT_LOGIN (default github-actions[bot]) and never calls gh api user; own-PR fallback kept. Adds tests/fake-gh and tests/test_post_review.sh.",
+        "status": "done",
+        "priority": "high",
+        "dependencies": ["2"],
+        "details": "Where: skills/the-judge/scripts/post_review.py. Reuses: aipp post_review.py. Requirement: CCR-11, CCR-16, CCR-18. Done when: fake gh log shows no api user call and --repo o/r on every pr call; missing --pr or --repo exits 1 with usage; author equal to login posts event COMMENT with the inherited own-PR footer; gate check passes; 12 tests pass. Tests: unit. Gate: quick (bash tests/run.sh). Commit: feat(skill): post_review targets explicit PR without gh api user.",
+        "testStrategy": "unit (bash + fake gh on PATH): tests/test_post_review.sh covers targeting, identity, marker, own-PR fallback, verdict retry, failure exits; run via bash tests/run.sh",
+        "subtasks": [],
+        "metadata": {
+          "wave": 3,
+          "onCriticalPath": true
+        },
+        "updatedAt": "2026-11-11T22:29:41.364Z"
+      },
+      {
+        "id": "4",
+        "title": "post_review.py appends the review marker",
+        "description": "Every posted review body ends with a blank line followed by the marker comment <!-- the-judge -->.",
+        "status": "done",
+        "priority": "high",
+        "dependencies": ["3"],
+        "details": "Where: skills/the-judge/scripts/post_review.py. Reuses: T3 test harness. Requirement: CCR-12. Done when: payload body captured by fake gh ends with <!-- the-judge -->, including with the own-PR footer; gate check passes; 14 tests pass. Tests: unit. Gate: quick (bash tests/run.sh). Commit: feat(skill): mark reviews posted by the-judge.",
+        "testStrategy": "unit: tests/test_post_review.sh asserts the captured body ends with the marker, with and without the own-PR footer; run via bash tests/run.sh",
+        "subtasks": [],
+        "metadata": {
+          "wave": 4,
+          "onCriticalPath": true
+        },
+        "updatedAt": "2026-11-11T22:30:13.439Z"
+      },
+      {
+        "id": "5",
+        "title": "post_review.py retries rejected verdicts as COMMENT and fails loudly",
+        "description": "On any rejected submission with event APPROVE or REQUEST_CHANGES, retry once with event COMMENT and the footer 'Intended verdict: <V>. Posted as a comment because GitHub rejected the <V> event for this repository.'; a rejected COMMENT post, a rejected retry, or a gate failure exits 1 with the reason.",
+        "status": "done",
+        "priority": "high",
+        "dependencies": ["4"],
+        "details": "Where: skills/the-judge/scripts/post_review.py. Reuses: aipp anchor hint. Requirement: CCR-15, CCR-17. Done when: fake gh rejecting the first POST gives two POSTs, second with event COMMENT and the footer, exit 0; fake gh rejecting both POSTs exits 1 with stderr containing review submission failed and the anchors; rejection with event COMMENT gives one POST only, exit 1; gate failure gives no POST and exit 1 with refusing to post, gate failed; gate check passes; 18 tests pass. Tests: unit. Gate: quick (bash tests/run.sh). Commit: feat(skill): retry rejected verdicts as comment.",
+        "testStrategy": "unit: tests/test_post_review.sh covers rejected APPROVE retry (two POSTs), double rejection (exit 1), rejected COMMENT (one POST, exit 1), gate failure (no POST); run via bash tests/run.sh",
+        "subtasks": [],
+        "metadata": {
+          "wave": 5,
+          "onCriticalPath": true
+        },
+        "updatedAt": "2026-11-11T22:30:48.975Z"
+      },
+      {
+        "id": "6",
+        "title": "SKILL.md adapted for unattended CI",
+        "description": "Step 0 takes PR number and repo from the prompt, uses $JUDGE_BOT_LOGIN, finds previous reviews by login plus <!-- the-judge --> selecting commit_id (round = count + 1, last reviewed commit = latest commit_id). Steps 1, 6 and 7 call scripts as python3 ~/.claude/skills/the-judge/scripts/..., Step 7 with --pr and --repo. The Convergence Contract sentence that forbids a fourth round is replaced by the round 4+ rule (CCR-29). The own-PR paragraph and Troubleshooting replace every human ask with stop and report the reason. All other sections unchanged.",
+        "status": "done",
+        "priority": "high",
+        "dependencies": ["5"],
+        "details": "Where: skills/the-judge/SKILL.md. Reuses: aipp SKILL.md. Requirement: CCR-11, CCR-13, CCR-14, CCR-17, CCR-18, CCR-29. Done when: tests/test_skill.sh asserts no gh api user; no ask the user; marker query with commit_id present; round rule text present; no cwd-relative python3 scripts/; post command has --pr and --repo; round 4+ sentence present and never runs a fourth round absent; sections Non-Negotiables, Severity and Verdict, Steps 2-5 byte-equal to aipp; Convergence Contract equal to aipp except the replaced sentence; gate check passes; 26 tests pass. Tests: unit. Gate: quick (bash tests/run.sh). Commit: feat(skill): run the-judge unattended in CI.",
+        "testStrategy": "unit (content assertions): tests/test_skill.sh checks no gh api user, no ask the user, marker query with commit_id, round rule, no cwd-relative scripts path, --pr/--repo in post command, round 4+ sentence, and byte-equal unchanged sections; run via bash tests/run.sh",
+        "subtasks": [],
+        "metadata": {
+          "wave": 6,
+          "onCriticalPath": true
+        },
+        "updatedAt": "2026-11-11T22:32:22.130Z"
+      },
+      {
+        "id": "7",
+        "title": "Central reusable workflow",
+        "description": "Create .github/workflows/claude-review.yml per design Central reusable workflow, plus tests/test_workflows.sh asserting each key with yq.",
+        "status": "done",
+        "priority": "high",
+        "dependencies": ["6"],
+        "details": "Where: .github/workflows/claude-review.yml. Reuses: plan YAML, minus CI_TEMPLATES_TOKEN, id-token: write and the _ci checkout token: input. Requirement: CCR-03, CCR-04, CCR-05, CCR-10, CCR-19, CCR-20, CCR-21, CCR-22, CCR-23. Done when: actionlint exits 0; yq assertions pass for only CLAUDE_TOKENS secret (required), permissions exactly two, job if, concurrency group and cancel, _ci checkout repository/ref/path with persist-credentials false and no token, install step copies to ~/.claude/skills and removes _ci, picker step id and env, no GITHUB_ENV write anywhere, action inputs (oauth token from steps.pick.outputs.token, github_token, prompt, --max-turns 60, --allowedTools with Write,Edit), step env JUDGE_BOT_LOGIN, no id-token; gate check passes; 39 tests pass. Tests: unit. Gate: build. Commit: feat(ci): reusable claude review workflow.",
+        "testStrategy": "unit + static: tests/test_workflows.sh yq key assertions, plus actionlint 1.7.12 on .github/workflows/claude-review.yml",
+        "subtasks": [],
+        "metadata": {
+          "wave": 7,
+          "onCriticalPath": true
+        },
+        "updatedAt": "2026-11-11T22:33:33.831Z"
+      },
+      {
+        "id": "8",
+        "title": "Caller workflow template",
+        "description": "Create caller/claude-review.yml per design Caller workflow template; add assertions to tests/test_workflows.sh, including that the central repo's .github/workflows/ has no pull_request trigger and no CLAUDE_TOKENS use outside workflow_call.",
+        "status": "done",
+        "priority": "high",
+        "dependencies": ["7"],
+        "details": "Where: caller/claude-review.yml. Reuses: plan caller YAML, with secrets: inherit replaced by explicit CLAUDE_TOKENS and a permissions: block. Requirement: CCR-02, CCR-24. Done when: actionlint exits 0 on both files; assertions pass for triggers [opened, synchronize, reopened, ready_for_review], one job, job permissions exactly contents: read and pull-requests: write, uses: value exact, CLAUDE_TOKENS passed explicitly, no secrets: inherit; gate check passes; 44 tests pass. Tests: unit. Gate: build. Commit: feat(ci): caller workflow template.",
+        "testStrategy": "static + unit: actionlint on both workflow files; tests/test_workflows.sh asserts triggers, single job, permissions, exact uses: value, explicit CLAUDE_TOKENS, no secrets: inherit, and no pull_request trigger in the central repo",
+        "subtasks": [],
+        "metadata": {
+          "wave": 8,
+          "onCriticalPath": true
+        },
+        "updatedAt": "2026-11-11T22:34:03.515Z"
+      },
+      {
+        "id": "9",
+        "title": "README setup and maintenance guide",
+        "description": "Write README.md with one-time setup, re-sync procedure, divergence list and caveats; tests/test_readme.sh greps each item.",
+        "status": "done",
+        "priority": "high",
+        "dependencies": ["8"],
+        "details": "Where: README.md. Reuses: plan One-time setup and Caveats. Requirement: CCR-26, CCR-27, CCR-28. Done when: assertions pass for each item of CCR-26, CCR-27, CCR-28; gate check passes; 47 tests pass. Tests: unit. Gate: quick (bash tests/run.sh). Commit: docs: setup and maintenance guide.",
+        "testStrategy": "unit (content assertions): tests/test_readme.sh greps each CCR-26, CCR-27, CCR-28 item; run via bash tests/run.sh",
+        "subtasks": [],
+        "metadata": {
+          "wave": 9,
+          "onCriticalPath": true
+        },
+        "updatedAt": "2026-11-11T22:35:49.658Z"
+      },
+      {
+        "id": "10",
+        "title": "Publish the central repo and tag v1",
+        "description": "Create public Ronnasayd/claude-pr-review on GitHub, push main, create lightweight tag v1. Each remote action needs the user's explicit go-ahead at the time.",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": ["9"],
+        "details": "Where: GitHub remote (no file). Reuses: none. Requirement: CCR-24, CCR-25. Done when: git ls-remote origin 'refs/tags/v1^{}' refs/tags/v1 shows the HEAD sha; gh api repos/Ronnasayd/claude-pr-review --jq .visibility prints public; gh secret list -R Ronnasayd/claude-pr-review prints nothing. Tests: none. Gate: build. Commit: none (remote-only task).",
+        "testStrategy": "none: remote-only checks via git ls-remote, gh api repo visibility, and gh secret list",
+        "subtasks": [],
+        "metadata": {
+          "wave": 10,
+          "onCriticalPath": true
+        }
+      },
+      {
+        "id": "11",
+        "title": "Smoke PR on a test repo",
+        "description": "tests/smoke.sh <owner/repo> <pr> plus a run on test repo Ronnasayd/claude-pr-review-smoke that has the caller file and CLAUDE_TOKENS (user creates the secret with real claude setup-token tokens). Open a PR, then push a second commit; tests/smoke.sh asserts the outcome. If /the-judge is not recognised, apply the design's prompt fallback (amending CCR-04, C4 and its assertion), move v1, and push a new commit to the PR; never a re-run, which reuses the first attempt's workflow SHA.",
+        "status": "pending",
+        "priority": "high",
+        "dependencies": ["10"],
+        "details": "Where: tests/smoke.sh. Reuses: none. Requirement: CCR-01, CCR-13. Done when: bash tests/smoke.sh Ronnasayd/claude-pr-review-smoke 1 exits 0 (latest run on the PR concluded success; two reviews by github-actions[bot] with <!-- the-judge -->; the second contains a Resolution section); run URL and review URLs recorded in ## Handoff under **Walked:**. Tests: e2e. Gate: full (bash tests/run.sh; bash tests/smoke.sh Ronnasayd/claude-pr-review-smoke 1). Commit: test(smoke): end-to-end review on a test repo.",
+        "testStrategy": "e2e: bash tests/smoke.sh Ronnasayd/claude-pr-review-smoke 1 (latest run success, two bot reviews with marker, second review has Resolution section)",
+        "subtasks": [],
+        "metadata": {
+          "wave": 11,
+          "onCriticalPath": true
+        }
+      }
+    ],
+    "metadata": {
+      "version": "1.0.0",
+      "lastModified": "2026-11-11T22:35:49.658Z",
+      "taskCount": 11,
+      "completedCount": 9,
+      "tags": ["ci-claude-code-review"]
+    }
+  }
+}
