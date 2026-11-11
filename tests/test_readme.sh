@@ -40,6 +40,15 @@ readme_caveats() {
   has 'far more of the plan limits than a one-shot prompt'
 }
 
+readme_quick_setup() {
+  has '## Quick setup'
+  has "gh api 'repos/Ronnasayd/claude-pr-review/contents/caller/claude-review.yml?ref=v1'"
+  has 'gh secret set CLAUDE_TOKENS'
+  has 'actions/permissions/workflow'
+  has 'can_approve_pull_request_reviews=true'
+}
+
+t "readme: quick setup with gh" readme_quick_setup
 t "readme: one-time setup" readme_setup
 t "readme: re-sync and divergences" readme_resync_and_divergences
 t "readme: caveats" readme_caveats

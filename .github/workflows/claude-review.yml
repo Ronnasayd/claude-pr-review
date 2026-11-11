@@ -43,5 +43,6 @@ jobs:
           github_token: ${{ github.token }}
           prompt: "/the-judge Review PR #${{ github.event.pull_request.number }} in ${{ github.repository }}. Write the review in Portuguese."
           claude_args: >-
+            --model sonnet
             --max-turns 60
             --allowedTools "Skill,Read,Write,Edit,Glob,Grep,WebSearch,WebFetch,Bash"

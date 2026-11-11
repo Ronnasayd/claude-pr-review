@@ -1,7 +1,7 @@
 # ci-claude-code-review proofs
 
-**HEAD**: 8af4f5d
-**Tree**: dirty - .p.out
+**HEAD**: fa535bc
+**Tree**: clean
 **Shell**: /bin/sh
 **Result**: 37 pass, 0 fail
 

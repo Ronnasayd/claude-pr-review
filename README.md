@@ -11,6 +11,33 @@ Each repository to review holds one small caller file. The review logic, the wor
 3. `scripts/pick-token.sh` picks one token at random from `CLAUDE_TOKENS` and passes it to the Claude step only, through a masked step output.
 4. The skill is copied to `~/.claude/skills/the-judge`, then `anthropics/claude-code-action@v1` runs `/the-judge` on the PR and posts the review in Portuguese.
 
+## Quick setup
+
+Run from the root of a clone of the repository to review, with `gh` logged in as a user with admin rights on it:
+
+```bash
+# 1. Download the caller workflow, pinned to the same tag it calls.
+mkdir -p .github/workflows
+gh api 'repos/Ronnasayd/claude-pr-review/contents/caller/claude-review.yml?ref=v1' \
+  -H 'Accept: application/vnd.github.raw' > .github/workflows/claude-review.yml
+
+# 2. Store the Claude tokens (from `claude setup-token`). gh prompts for the value,
+#    so the tokens stay out of the shell history. Format: tok1;tok2;tok3
+gh secret set CLAUDE_TOKENS
+
+# 3. Let the bot post APPROVE / REQUEST_CHANGES. Fails with 409 when the organization
+#    forbids it; then enable it in the organization settings first.
+gh api -X PUT 'repos/{owner}/{repo}/actions/permissions/workflow' \
+  -F can_approve_pull_request_reviews=true
+
+# 4. Commit and push the workflow.
+git add .github/workflows/claude-review.yml
+git commit -m "ci: add Claude PR review"
+git push
+```
+
+The table below explains each step.
+
 ## One-time setup
 
 | Where                                                               | What                                                                                                                                                                                                                                                                                        |

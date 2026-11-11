@@ -90,7 +90,7 @@ wf_claude_prompt_and_args() {
   [ "$(claude_step .with.prompt)" = '/the-judge Review PR #${{ github.event.pull_request.number }} in ${{ github.repository }}. Write the review in Portuguese.' ]
   [ "$(claude_step .with.github_token)" = '${{ github.token }}' ]
   [ "$(claude_step .with.claude_args | tr -s ' \n' '  ' | sed 's/ $//')" = \
-    '--max-turns 60 --allowedTools "Skill,Read,Write,Edit,Glob,Grep,WebSearch,WebFetch,Bash"' ]
+    '--model sonnet --max-turns 60 --allowedTools "Skill,Read,Write,Edit,Glob,Grep,WebSearch,WebFetch,Bash"' ]
 }
 
 wf_bot_login_env() {
