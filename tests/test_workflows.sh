@@ -103,3 +103,44 @@ t "workflow: token only via step output" wf_token_via_output
 t "workflow: installs skill to home and removes _ci before claude" wf_installs_skill
 t "workflow: claude prompt and args" wf_claude_prompt_and_args
 t "workflow: bot login env on claude step" wf_bot_login_env
+
+C=$ROOT/caller/claude-review.yml
+cq() { yq -r "$1" "$C"; }
+
+caller_triggers() {
+  [ "$(cq '.on | keys | join(",")')" = pull_request ]
+  [ "$(cq '.on.pull_request.types | join(",")')" = "opened,synchronize,reopened,ready_for_review" ]
+}
+
+caller_one_job() {
+  [ "$(cq '.jobs | keys | join(",")')" = review ]
+  [ "$(cq '.jobs.review | keys | join(",")')" = "permissions,uses,secrets" ]
+}
+
+caller_uses_central() {
+  [ "$(cq '.jobs.review.uses')" = Ronnasayd/claude-pr-review/.github/workflows/claude-review.yml@v1 ]
+  [ "$(cq '.jobs.review.permissions | to_entries | map(.key + "=" + .value) | join(",")')" = "contents=read,pull-requests=write" ]
+  [ "$(cq '.jobs.review.secrets | to_entries | map(.key + "=" + .value) | join(",")')" = 'CLAUDE_TOKENS=${{ secrets.CLAUDE_TOKENS }}' ]
+}
+
+caller_no_secrets_inherit() {
+  [ -f "$C" ]
+  ! grep -q 'inherit' "$C"
+}
+
+central_never_reviews_itself() {
+  local f
+  [ -f "$C" ]
+  [ ! -e "$ROOT/.github/workflows/$(basename "$C")" ] || [ "$(yq -r '.on | keys | join(",")' "$ROOT/.github/workflows/$(basename "$C")")" = workflow_call ]
+  for f in "$ROOT"/.github/workflows/*.yml "$ROOT"/.github/workflows/*.yaml; do
+    [ -e "$f" ] || continue
+    [ "$(yq -r '.on | has("pull_request") or has("pull_request_target")' "$f")" = false ]
+    if grep -q 'CLAUDE_TOKENS' "$f"; then [ "$(yq -r '.on | keys | join(",")' "$f")" = workflow_call ]; fi
+  done
+}
+
+t "caller: triggers on open, sync, reopen and ready for review" caller_triggers
+t "caller: one job" caller_one_job
+t "caller: uses central workflow at v1 with permissions and secret" caller_uses_central
+t "caller: no secrets inherit" caller_no_secrets_inherit
+t "caller: central repo never reviews itself" central_never_reviews_itself

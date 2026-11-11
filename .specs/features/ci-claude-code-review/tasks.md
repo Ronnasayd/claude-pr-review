@@ -233,10 +233,10 @@ T9 → T10 → T11
 
 **Done when**:
 
-- [ ] actionlint exits 0 on both files
-- [ ] Assertions pass: triggers `[opened, synchronize, reopened, ready_for_review]`, one job, job `permissions` exactly `contents: read` and `pull-requests: write`, `uses:` value exact, `CLAUDE_TOKENS` passed explicitly, no `secrets: inherit`
-- [ ] Gate check passes: Build
-- [ ] Test count: 44 tests pass
+- [x] actionlint exits 0 on both files
+- [x] Assertions pass: triggers `[opened, synchronize, reopened, ready_for_review]`, one job, job `permissions` exactly `contents: read` and `pull-requests: write`, `uses:` value exact, `CLAUDE_TOKENS` passed explicitly, no `secrets: inherit`
+- [x] Gate check passes: Build
+- [x] Test count: 44 tests pass
 
 **Tests**: unit
 **Gate**: build
