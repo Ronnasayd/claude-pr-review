@@ -1,5 +1,6 @@
 <!-- INIT:AUTO-GENERATED-CONTEXT:DO-NOT-MODIFY -->
 
+
 ## Mandatory rules — always follow
 
 - User question → interactive tool, never plain text. Claude: `AskUserQuestion`. Many questions: `grilling` skill.
@@ -43,7 +44,5 @@
 ## Context-Specific Rules
 
 The following rules apply to specific file types:
-
 - [code.instructions](.claude/instructions/code.instructions.md) — applies to: `**/*.ts, **/*.js, **/*.py, **/*.java, **/*.go, **/*.css, **/*.cpp, **/*.c, **/*.vue, **/*.jsx, **/*.tsx`
-
 <!-- END:AUTO-GENERATED-CONTEXT:DO-NOT-MODIFY -->
