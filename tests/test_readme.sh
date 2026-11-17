@@ -48,7 +48,16 @@ readme_quick_setup() {
   has 'can_approve_pull_request_reviews=true'
 }
 
+readme_multi_repo() {
+  has '## Set up several repositories'
+  has 'scripts/set-claude-multi-repos.sh'
+  has 'CLAUDE_TOKENS="tok1;tok2" bash scripts/set-claude-multi-repos.sh'
+  has 'workflow` scope'
+  has 'add-claude-review'
+}
+
 t "readme: quick setup with gh" readme_quick_setup
+t "readme: multi-repo setup script" readme_multi_repo
 t "readme: one-time setup" readme_setup
 t "readme: re-sync and divergences" readme_resync_and_divergences
 t "readme: caveats" readme_caveats
