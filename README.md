@@ -48,6 +48,23 @@ The table below explains each step.
 | Each caller repository → Settings → Actions → General               | Enable "Allow GitHub Actions to create and approve pull requests". Without it an APPROVE or REQUEST_CHANGES verdict is posted as a COMMENT with the intended verdict in a footer.                                                                                                           |
 | This repository                                                     | Keep it public and without secrets. Create the tag callers use: `git tag v1 && git push origin v1`. The workflow checks itself out at ref `v1`, so keep that ref equal to the tag.                                                                                                          |
 
+## Set up several repositories
+
+`scripts/set-claude-multi-repos.sh` runs the Quick setup steps for every repository in its `repos` array. Edit that array first, then run:
+
+```bash
+CLAUDE_TOKENS="tok1;tok2" bash scripts/set-claude-multi-repos.sh
+```
+
+For each repository it:
+
+1. Sets the `CLAUDE_TOKENS` secret.
+2. Enables `can_approve_pull_request_reviews`. On a 409 it prints a warning and goes on; enable the option in the organization settings.
+3. Skips the repository when `.github/workflows/claude-review.yml` already exists on the default branch.
+4. Otherwise creates the branch `add-claude-review` with the caller workflow from `v1` and opens a PR. When that branch already exists, it assumes an earlier run opened the PR and skips.
+
+The `gh` token needs the `workflow` scope (`gh auth refresh -s workflow`), because the script writes under `.github/workflows` through the API. Prefix the command with a space so the tokens stay out of the shell history (with `HISTCONTROL=ignorespace` in bash, or `setopt HIST_IGNORE_SPACE` in zsh).
+
 ## Re-sync the skill from aipp
 
 `skills/the-judge` is a copy of `aipp/skills/tech-leads-club/the-judge` (v1.4.0) adapted for CI. It does not follow `aipp` on its own. To pick up upstream changes:
@@ -82,7 +99,9 @@ The table below explains each step.
 
 ```bash
 bash tests/run.sh
-docker run --rm -v "$PWD:/repo" -w /repo rhysd/actionlint:1.7.12 .github/workflows/claude-review.yml caller/claude-review.yml
+docker run --rm -v "$PWD:/repo" -w /repo rhysd/actionlint:1.7.12 .github/workflows/claude-review.yml .github/workflows/tests.yml caller/claude-review.yml
 ```
+
+`.github/workflows/tests.yml` runs both commands on every push. It checks out `aipp` at the commit the skill copy tracks, so update its `ref` after a re-sync.
 
 `tests/smoke.sh <owner/repo> <pr>` checks a live run on a test repository.
