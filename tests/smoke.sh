@@ -18,6 +18,6 @@ reviews=$(gh api "repos/$repo/pulls/$pr/reviews?per_page=100" --jq \
 count=$(jq length <<<"$reviews")
 jq -r '.[] | "review: \(.html_url)"' <<<"$reviews"
 [ "$count" -eq 2 ] || { echo "FAIL: expected 2 marked reviews, got $count"; exit 1; }
-# why: the review is written in Portuguese, so the heading may read "Resolução"; the gate matches "resolu" too.
+# why: the review may be written in another language (e.g. Portuguese "Resolução"); the gate matches "resolu" too.
 jq -r '.[1].body' <<<"$reviews" | grep -Eqi '^## Resolu' || { echo "FAIL: second review has no Resolution section"; exit 1; }
 echo "PASS: smoke $repo#$pr"
