@@ -25,7 +25,7 @@ sequenceDiagram
     RW->>CR: checkout ref v1 into _ci/ (default token, public repo, persist-credentials false)
     RW->>RW: bash _ci/scripts/pick-token.sh -> steps.pick.outputs.token (masked)
     RW->>RW: cp _ci/skills/the-judge ~/.claude/skills/ ; rm -rf _ci
-    RW->>CCA: claude_code_oauth_token, github_token, prompt "/the-judge Review PR #N in o/r. Write the review in Portuguese."
+    RW->>CCA: claude_code_oauth_token, github_token, prompt "/the-judge Review PR #N in o/r. Write the review in English."
     Note over CCA: restores .claude/ from base (user-scope skill untouched)<br/>sets GH_TOKEN from github_token
     CCA->>GH: gh pr view / gh pr diff / reviews (round detection by login + marker)
     CCA->>GH: post_review.py --pr N --repo o/r -> one review, marker <!-- the-judge -->
@@ -34,7 +34,7 @@ sequenceDiagram
 
 **Why the skill goes to `~/.claude/skills`**: claude-code-action restores `.claude/` from the PR base branch and deletes paths absent there (`docs/security.md`, `src/github/operations/restore-config.ts`). A copy under the workspace `.claude/skills/` would be deleted before Claude starts. The action's default `settingSources` includes `user` (`base-action/src/parse-sdk-options.ts`), which supports loading it; the smoke PR proves it.
 
-**Fallback** if the smoke PR shows `/the-judge` is not recognised: change the prompt to `Read and follow ~/.claude/skills/the-judge/SKILL.md. Review PR #N in o/r. Write the review in Portuguese.` and amend CCR-04, C4 and its `yq` assertion in the same commit. Apply it by pushing a new commit to the smoke PR after moving `v1` - a re-run reuses the first attempt's reusable-workflow SHA (GitHub docs, reusing workflows).
+**Fallback** if the smoke PR shows `/the-judge` is not recognised: change the prompt to `Read and follow ~/.claude/skills/the-judge/SKILL.md. Review PR #N in o/r. Write the review in English.` and amend CCR-04, C4 and its `yq` assertion in the same commit. Apply it by pushing a new commit to the smoke PR after moving `v1` - a re-run reuses the first attempt's reusable-workflow SHA (GitHub docs, reusing workflows).
 
 ---
 

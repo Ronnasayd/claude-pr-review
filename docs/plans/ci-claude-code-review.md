@@ -109,7 +109,7 @@ jobs:
         with:
           claude_code_oauth_token: ${{ steps.pick.outputs.token }}
           prompt: |
-            /the-judge Review PR #${{ github.event.pull_request.number }} in ${{ github.repository }}. Write the review in Portuguese.
+            /the-judge Review PR #${{ github.event.pull_request.number }} in ${{ github.repository }}. Write the review in English.
           claude_args: |
             --max-turns 60
             --allowedTools "Skill,Read,Glob,Grep,WebSearch,WebFetch,Bash"

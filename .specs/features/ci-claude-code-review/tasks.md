@@ -316,7 +316,7 @@ Proof: `bash tests/smoke.sh Ronnasayd/claude-pr-review-smoke 1`
 Proof: run unit | ok - caller: uses central workflow at v1 with permissions and secret
 
 **C3** - Skill is copied to `~/.claude/skills/the-judge` and `_ci` is removed before the Claude step (CCR-03, AC 3)
-Proof: run unit | ok - workflow: installs skill to home and removes _ci before claude
+Proof: run unit | ok - workflow: installs skill to home and removes \_ci before claude
 
 **C4** - Claude step prompt, `--max-turns 60` and `--allowedTools` list (with `Write,Edit`) match the spec (CCR-04, AC 4)
 Proof: run unit | ok - workflow: claude prompt and args

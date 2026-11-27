@@ -9,7 +9,7 @@ Each repository to review holds one small caller file. The review logic, the wor
 1. The caller workflow (`caller/claude-review.yml`, copied to `.github/workflows/claude-review.yml` in each repository) runs on `opened`, `synchronize`, `reopened` and `ready_for_review`, and calls `.github/workflows/claude-review.yml@v1` from this repository.
 2. The central job skips drafts, fork PRs and `dependabot[bot]`, and cancels a running review of the same PR when a newer push arrives.
 3. `scripts/pick-token.sh` picks one token at random from `CLAUDE_TOKENS` and passes it to the Claude step only, through a masked step output.
-4. The skill is copied to `~/.claude/skills/the-judge`, then `anthropics/claude-code-action@v1` runs `/the-judge` on the PR and posts the review in Portuguese.
+4. The skill is copied to `~/.claude/skills/the-judge`, then `anthropics/claude-code-action@v1` runs `/the-judge` on the PR and posts the review in English.
 
 ## Quick setup
 
